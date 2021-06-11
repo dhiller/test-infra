@@ -192,6 +192,28 @@ func TestShouldReport(t *testing.T) {
 			},
 			expected: false,
 		},
+		// TODO: shouldn't this work? Or aren't we supposed to be able to silence jobs somehow?
+		{
+			name:   "Overriding prow config with unsetting job states does not work!",
+			config: config.SlackReporter{
+				JobTypesToReport:  []v1.ProwJobType{v1.PresubmitJob},
+				JobStatesToReport: []v1.ProwJobState{v1.SuccessState},
+			},
+			pj: &v1.ProwJob{
+				Spec: v1.ProwJobSpec{
+					Type: v1.PresubmitJob,
+					ReporterConfig:	&v1.ReporterConfig{
+						Slack: &v1.SlackReporterConfig{
+							JobStatesToReport: nil,
+						},
+					},
+				},
+				Status: v1.ProwJobStatus{
+					State: v1.SuccessState,
+				},
+			},
+			expected: true,
+		},
 	}
 
 	for _, tc := range testCases {
